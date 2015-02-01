@@ -90,6 +90,7 @@ class ChatParser(object):
             return None
 
     def _parse_for_links(self, word):
+        # regexp taken from http://code.tutsplus.com/tutorials/8-regular-expressions-you-should-know--net-6149
         match = re.search("""^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$""", word)
         try:
             matched_word = match.group(0)
