@@ -5,7 +5,6 @@ __author__ = 'khariharan'
 
 
 class TestChatParser(unittest.TestCase):
-
     def setUp(self):
         # Nothing to do here yet
         self.parser = ChatParser()
@@ -42,4 +41,25 @@ class TestChatParser(unittest.TestCase):
         self.assertEqual('{"emoticons": ["eyes", "skies", "seeeeeeeeee"]}', output)
 
 
+    def test_link(self):
+        output = self.parser.parse('This article explains what you are looking for http://goo.gl/8zH2Kr')
+        self.assertEqual(
+            '{"links": [{"url": "http://goo.gl/8zH2Kr", "title": "Rick Astley - Never Gonna Give You Up - YouTube"}]}',
+            output)
+
+        output = self.parser.parse('This one is definitely not going to work https://www.google.com')
+        self.assertEqual('{"links": [{"url": "https://www.google.com", "title": "Google"}]}', output)
+
+        output = self.parser.parse('This one never has any links')
+        self.assertEqual('{}', output)
+
+        output = self.parser.parse('This link doesnt really exist http://letsnotgofindthisanswerforallthepeopleintheworld.com')
+        self.assertEqual('{}', output)
+
+    def test_links(self):
+        output = self.parser.parse(
+            'Lets try these links http://www.nbcolympics.com and then this one http://goo.gl/8zH2Kr')
+        self.assertEqual(
+            '{"links": [{"url": "http://www.nbcolympics.com", "title": "NBC Olympics | Home of the 2016 Olympic Games in Rio"}, {"url": "http://goo.gl/8zH2Kr", "title": "Rick Astley - Never Gonna Give You Up - YouTube"}]}',
+            output)
 

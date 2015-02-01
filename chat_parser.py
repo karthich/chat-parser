@@ -2,6 +2,9 @@ import json
 
 __author__ = 'khariharan'
 import re
+import urllib2
+from BeautifulSoup import BeautifulSoup
+
 
 class ChatParser(object):
     # This is just a stub for now
@@ -14,6 +17,7 @@ class ChatParser(object):
 
         mentions = []
         emoticons = []
+        links = []
 
         # Going to go ahead and assume that a word can be only a mention or emoticon or url
         for word in words:
@@ -27,6 +31,11 @@ class ChatParser(object):
                 emoticons.append(parsed_output_emoticons)
                 continue
 
+            parsed_output_links = self._parse_for_links(word)
+            if parsed_output_links is not None:
+                links.append(parsed_output_links)
+                continue
+
         parsed_output = {}
 
         if len(mentions) > 0:
@@ -34,6 +43,9 @@ class ChatParser(object):
 
         if len(emoticons) > 0:
             parsed_output['emoticons'] = emoticons
+
+        if len(links) > 0:
+            parsed_output['links'] = links
 
         return json.dumps(parsed_output)
 
@@ -72,9 +84,24 @@ class ChatParser(object):
         match = re.search("""^\([\w]*\)[\.,;?!]*$""", word)
         try:
             matched_word = match.group(0)
-            return matched_word[matched_word.find("(")+1:matched_word.find(")")]
+            return matched_word[matched_word.find("(") + 1:matched_word.find(")")]
 
         except AttributeError:
             return None
 
+    def _parse_for_links(self, word):
+        match = re.search("""^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$""", word)
+        try:
+            matched_word = match.group(0)
+            soup = BeautifulSoup(urllib2.urlopen(matched_word))
+            title = soup.title.string
+            if title is not None:
+                return {'url': matched_word, 'title': soup.title.string}
+            else:
+                return None
+
+        except AttributeError:
+            return None
+        except urllib2.URLError:
+            return None
 
