@@ -53,7 +53,8 @@ class TestChatParser(unittest.TestCase):
         output = self.parser.parse('This one never has any links')
         self.assertEqual('{}', output)
 
-        output = self.parser.parse('This link doesnt really exist http://letsnotgofindthisanswerforallthepeopleintheworld.com')
+        output = self.parser.parse(
+            'This link doesnt really exist http://letsnotgofindthisanswerforallthepeopleintheworld.com')
         self.assertEqual('{}', output)
 
     def test_links(self):
@@ -61,5 +62,15 @@ class TestChatParser(unittest.TestCase):
             'Lets try these links http://www.nbcolympics.com and then this one http://goo.gl/8zH2Kr')
         self.assertEqual(
             '{"links": [{"url": "http://www.nbcolympics.com", "title": "NBC Olympics | Home of the 2016 Olympic Games in Rio"}, {"url": "http://goo.gl/8zH2Kr", "title": "Rick Astley - Never Gonna Give You Up - YouTube"}]}',
+            output)
+
+
+    def test_all(self):
+        output = self.parser.parse(
+            '@chris you around? Good morning! (megusta) (coffee) Olympics are starting soon; http://www.nbcolympics.com @bob @john (success) such a cool feature; https://twitter.com/jdorfman/status/430511497475670016'
+        )
+
+        self.assertEqual(
+            '{"mentions": ["chris", "bob", "john"], "emoticons": ["megusta", "coffee", "success"], "links": [{"url": "http://www.nbcolympics.com", "title": "NBC Olympics | Home of the 2016 Olympic Games in Rio"}, {"url": "https://twitter.com/jdorfman/status/430511497475670016", "title": "Justin Dorfman on Twitter: &quot;nice @littlebigdetail from @HipChat (shows hex colors when pasted in chat). http://t.co/7cI6Gjy5pq&quot;"}]}',
             output)
 
