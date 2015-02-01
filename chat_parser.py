@@ -13,6 +13,7 @@ class ChatParser(object):
         words = self.split_message_into_words(message)
 
         mentions = []
+        emoticons = []
 
         # Going to go ahead and assume that a word can be only a mention or emoticon or url
         for word in words:
@@ -21,10 +22,18 @@ class ChatParser(object):
                 mentions.append(parsed_output_mentions)
                 continue
 
+            parsed_output_emoticons = self._parse_for_emoticons(word)
+            if parsed_output_emoticons is not None:
+                emoticons.append(parsed_output_emoticons)
+                continue
+
         parsed_output = {}
 
         if len(mentions) > 0:
             parsed_output['mentions'] = mentions
+
+        if len(emoticons) > 0:
+            parsed_output['emoticons'] = emoticons
 
         return json.dumps(parsed_output)
 
@@ -56,4 +65,16 @@ class ChatParser(object):
         except AttributeError:
             # no mention was made
             return None
+
+
+    def _parse_for_emoticons(self, word):
+        # Same as before except that it wont match with anything that doesnt fit that pattern (word_characters)
+        match = re.search("""^\([\w]*\)[\.,;?!]*$""", word)
+        try:
+            matched_word = match.group(0)
+            return matched_word[matched_word.find("(")+1:matched_word.find(")")]
+
+        except AttributeError:
+            return None
+
 
